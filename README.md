@@ -1,4 +1,5 @@
-Run npm install lucide-react@latest
+#Run
+npm install lucide-react@latest
 
 
 # Getting Started with Create React App
