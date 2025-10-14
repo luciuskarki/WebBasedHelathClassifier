@@ -1,0 +1,752 @@
+{
+  "numeric": [
+    "Age",
+    "Academic Pressure",
+    "Work Pressure",
+    "CGPA",
+    "Study Satisfaction",
+    "Job Satisfaction",
+    "Work/Study Hours"
+  ],
+  "categorical": [
+    "Gender",
+    "City",
+    "Profession",
+    "Sleep Duration",
+    "Dietary Habits",
+    "Degree",
+    "Financial Stress",
+    "Family History of Mental Illness"
+  ],
+  "numeric_imputation": {
+    "Age": 26.0,
+    "Academic Pressure": 3.0,
+    "Work Pressure": 0.0,
+    "CGPA": 7.77,
+    "Study Satisfaction": 3.0,
+    "Job Satisfaction": 0.0,
+    "Work/Study Hours": 8.0
+  },
+  "numeric_ranges_train": {
+    "Age": {
+      "min": 18.0,
+      "max": 59.0
+    },
+    "Academic Pressure": {
+      "min": 0.0,
+      "max": 5.0
+    },
+    "Work Pressure": {
+      "min": 0.0,
+      "max": 5.0
+    },
+    "CGPA": {
+      "min": 0.0,
+      "max": 10.0
+    },
+    "Study Satisfaction": {
+      "min": 0.0,
+      "max": 5.0
+    },
+    "Job Satisfaction": {
+      "min": 0.0,
+      "max": 4.0
+    },
+    "Work/Study Hours": {
+      "min": 0.0,
+      "max": 12.0
+    }
+  },
+  "categorical_vocabulary": {
+    "Gender": [
+      "Female",
+      "Male"
+    ],
+    "City": [
+      "'Less Delhi'",
+      "'Less than 5 Kalyan'",
+      "3.0",
+      "Agra",
+      "Ahmedabad",
+      "Bangalore",
+      "Bhavna",
+      "Bhopal",
+      "Chennai",
+      "City",
+      "Delhi",
+      "Faridabad",
+      "Gaurav",
+      "Ghaziabad",
+      "Harsh",
+      "Harsha",
+      "Hyderabad",
+      "Indore",
+      "Jaipur",
+      "Kalyan",
+      "Kanpur",
+      "Khaziabad",
+      "Kolkata",
+      "Lucknow",
+      "Ludhiana",
+      "M.Com",
+      "M.Tech",
+      "Meerut",
+      "Mihir",
+      "Mira",
+      "Mumbai",
+      "Nagpur",
+      "Nalyan",
+      "Nandini",
+      "Nashik",
+      "Patna",
+      "Pune",
+      "Rajkot",
+      "Reyansh",
+      "Saanvi",
+      "Srinagar",
+      "Surat",
+      "Thane",
+      "Vadodara",
+      "Varanasi",
+      "Vasai-Virar",
+      "Visakhapatnam"
+    ],
+    "Profession": [
+      "'Civil Engineer'",
+      "'Content Writer'",
+      "'Digital Marketer'",
+      "'Educational Consultant'",
+      "Architect",
+      "Chef",
+      "Doctor",
+      "Entrepreneur",
+      "Lawyer",
+      "Manager",
+      "Pharmacist",
+      "Student",
+      "Teacher"
+    ],
+    "Sleep Duration": [
+      "'5-6 hours'",
+      "'7-8 hours'",
+      "'Less than 5 hours'",
+      "'More than 8 hours'",
+      "Others"
+    ],
+    "Dietary Habits": [
+      "Healthy",
+      "Moderate",
+      "Others",
+      "Unhealthy"
+    ],
+    "Degree": [
+      "'Class 12'",
+      "B.Arch",
+      "B.Com",
+      "B.Ed",
+      "B.Pharm",
+      "B.Tech",
+      "BA",
+      "BBA",
+      "BCA",
+      "BE",
+      "BHM",
+      "BSc",
+      "LLB",
+      "LLM",
+      "M.Com",
+      "M.Ed",
+      "M.Pharm",
+      "M.Tech",
+      "MA",
+      "MBA",
+      "MBBS",
+      "MCA",
+      "MD",
+      "ME",
+      "MHM",
+      "MSc",
+      "Others",
+      "PhD"
+    ],
+    "Financial Stress": [
+      "1.0",
+      "2.0",
+      "3.0",
+      "4.0",
+      "5.0",
+      "?"
+    ],
+    "Family History of Mental Illness": [
+      "No",
+      "Yes"
+    ]
+  },
+  "final_feature_order": [
+    {
+      "source": "Age",
+      "kind": "numeric"
+    },
+    {
+      "source": "Academic Pressure",
+      "kind": "numeric"
+    },
+    {
+      "source": "Work Pressure",
+      "kind": "numeric"
+    },
+    {
+      "source": "CGPA",
+      "kind": "numeric"
+    },
+    {
+      "source": "Study Satisfaction",
+      "kind": "numeric"
+    },
+    {
+      "source": "Job Satisfaction",
+      "kind": "numeric"
+    },
+    {
+      "source": "Work/Study Hours",
+      "kind": "numeric"
+    },
+    {
+      "source": "Gender",
+      "kind": "onehot",
+      "category": "Female"
+    },
+    {
+      "source": "Gender",
+      "kind": "onehot",
+      "category": "Male"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "'Less Delhi'"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "'Less than 5 Kalyan'"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "3.0"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Agra"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Ahmedabad"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Bangalore"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Bhavna"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Bhopal"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Chennai"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "City"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Delhi"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Faridabad"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Gaurav"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Ghaziabad"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Harsh"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Harsha"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Hyderabad"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Indore"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Jaipur"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Kalyan"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Kanpur"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Khaziabad"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Kolkata"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Lucknow"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Ludhiana"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "M.Com"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "M.Tech"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Meerut"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Mihir"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Mira"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Mumbai"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Nagpur"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Nalyan"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Nandini"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Nashik"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Patna"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Pune"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Rajkot"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Reyansh"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Saanvi"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Srinagar"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Surat"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Thane"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Vadodara"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Varanasi"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Vasai-Virar"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Visakhapatnam"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "'Civil Engineer'"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "'Content Writer'"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "'Digital Marketer'"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "'Educational Consultant'"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Architect"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Chef"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Doctor"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Entrepreneur"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Lawyer"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Manager"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Pharmacist"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Student"
+    },
+    {
+      "source": "Profession",
+      "kind": "onehot",
+      "category": "Teacher"
+    },
+    {
+      "source": "Sleep Duration",
+      "kind": "onehot",
+      "category": "'5-6 hours'"
+    },
+    {
+      "source": "Sleep Duration",
+      "kind": "onehot",
+      "category": "'7-8 hours'"
+    },
+    {
+      "source": "Sleep Duration",
+      "kind": "onehot",
+      "category": "'Less than 5 hours'"
+    },
+    {
+      "source": "Sleep Duration",
+      "kind": "onehot",
+      "category": "'More than 8 hours'"
+    },
+    {
+      "source": "Sleep Duration",
+      "kind": "onehot",
+      "category": "Others"
+    },
+    {
+      "source": "Dietary Habits",
+      "kind": "onehot",
+      "category": "Healthy"
+    },
+    {
+      "source": "Dietary Habits",
+      "kind": "onehot",
+      "category": "Moderate"
+    },
+    {
+      "source": "Dietary Habits",
+      "kind": "onehot",
+      "category": "Others"
+    },
+    {
+      "source": "Dietary Habits",
+      "kind": "onehot",
+      "category": "Unhealthy"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "'Class 12'"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "B.Arch"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "B.Com"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "B.Ed"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "B.Pharm"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "B.Tech"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "BA"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "BBA"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "BCA"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "BE"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "BHM"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "BSc"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "LLB"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "LLM"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "M.Com"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "M.Ed"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "M.Pharm"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "M.Tech"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MA"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MBA"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MBBS"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MCA"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MD"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "ME"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MHM"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "MSc"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "Others"
+    },
+    {
+      "source": "Degree",
+      "kind": "onehot",
+      "category": "PhD"
+    },
+    {
+      "source": "Financial Stress",
+      "kind": "onehot",
+      "category": "1.0"
+    },
+    {
+      "source": "Financial Stress",
+      "kind": "onehot",
+      "category": "2.0"
+    },
+    {
+      "source": "Financial Stress",
+      "kind": "onehot",
+      "category": "3.0"
+    },
+    {
+      "source": "Financial Stress",
+      "kind": "onehot",
+      "category": "4.0"
+    },
+    {
+      "source": "Financial Stress",
+      "kind": "onehot",
+      "category": "5.0"
+    },
+    {
+      "source": "Financial Stress",
+      "kind": "onehot",
+      "category": "?"
+    },
+    {
+      "source": "Family History of Mental Illness",
+      "kind": "onehot",
+      "category": "No"
+    },
+    {
+      "source": "Family History of Mental Illness",
+      "kind": "onehot",
+      "category": "Yes"
+    }
+  ],
+  "preproc_version": "v1",
+  "trained_on": "2025-10-14"
+}
