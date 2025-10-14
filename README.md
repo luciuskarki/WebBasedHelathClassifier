@@ -1,4 +1,3 @@
-#Run
 npm install lucide-react@latest
 
 
