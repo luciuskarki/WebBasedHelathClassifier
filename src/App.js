@@ -20,7 +20,7 @@ const DepressionPredictionApp = () => {
         const [modelRes, preprocRes, csvRes] = await Promise.all([
           fetch('dt_model_v1.json'),
           fetch('preproc_v1.json'),
-          fetch('output.csv')
+          fetch('student_depression_dataset.csv')
         ]);
 
         const modelData = await modelRes.json();
@@ -172,6 +172,22 @@ const DepressionPredictionApp = () => {
     });
   };
 
+  const handleReset = () => {
+    // Reset form data
+    const initialForm = {};
+    preproc.numeric.forEach(col => {
+      initialForm[col] = '';
+    });
+    preproc.categorical.forEach(col => {
+      initialForm[col] = '';
+    });
+    setFormData(initialForm);
+
+    // Clear errors and prediction
+    setErrors({});
+    setPrediction(null);
+  };
+
   const loadCSV = async (file) => {
     const text = await file.text();
     const lines = text.split('\n').filter(line => line.trim());
@@ -316,42 +332,74 @@ const DepressionPredictionApp = () => {
                 </div>
 
                 <div className="form-grid">
-                  {preproc?.numeric.map(col => (
-                    <div key={col} className="form-group">
-                      <label className="form-label">{col}</label>
-                      <input
-                        type="number"
-                        value={formData[col] || ''}
-                        onChange={(e) => handleInputChange(col, e.target.value)}
-                        step="0.1"
-                        className={`form-input ${errors[col] ? 'input-error' : ''}`}
-                        placeholder={`e.g., ${preproc.numeric_imputation[col]?.toFixed(1)}`}
-                      />
-                      {errors[col] && (
-                        <p className="error-message">{errors[col]}</p>
-                      )}
-                    </div>
-                  ))}
+                  {preproc?.numeric.map(col => {
+                    const ranges = preproc.numeric_ranges_train?.[col];
+                    return (
+                      <div key={col} className="form-group">
+                        <label className="form-label">
+                          {col}
+                          {ranges && (
+                            <span className="range-hint">
+                              (Range: {ranges.min.toFixed(1)} - {ranges.max.toFixed(1)})
+                            </span>
+                          )}
+                        </label>
+                        <input
+                          type="number"
+                          value={formData[col] || ''}
+                          onChange={(e) => handleInputChange(col, e.target.value)}
+                          step="0.1"
+                          min={ranges ? ranges.min * 0.5 : undefined}
+                          max={ranges ? ranges.max * 2 : undefined}
+                          className={`form-input ${errors[col] ? 'input-error' : ''}`}
+                        />
+                        {errors[col] && (
+                          <p className="error-message">{errors[col]}</p>
+                        )}
+                      </div>
+                    );
+                  })}
 
-                  {preproc?.categorical.map(col => (
-                    <div key={col} className="form-group">
-                      <label className="form-label">{col}</label>
-                      <select
-                        value={formData[col] || ''}
-                        onChange={(e) => handleInputChange(col, e.target.value)}
-                        className="form-select"
-                      >
-                        <option value="">Select...</option>
-                        {preproc.categorical_vocabulary[col]
-                          .filter(v => v !== null)
-                          .map(option => (
-                            <option key={option} value={option}>
-                              {option}
-                            </option>
-                          ))}
-                      </select>
-                    </div>
-                  ))}
+                  {preproc?.categorical.map(col => {
+                    const vocab = preproc.categorical_vocabulary[col];
+                    const isRating = vocab.every(v => v === null || (typeof v === 'number' && v >= 0 && v <= 5));
+
+                    return (
+                      <div key={col} className="form-group">
+                        <label className="form-label">{col}</label>
+
+                        {isRating ? (
+                          <div className="rating-container">
+                            {vocab.filter(v => v !== null).map(option => (
+                              <button
+                                key={option}
+                                type="button"
+                                onClick={() => handleInputChange(col, option)}
+                                className={`rating-bubble ${formData[col] === option ? 'rating-selected' : ''}`}
+                              >
+                                {option}
+                              </button>
+                            ))}
+                          </div>
+                        ) : (
+                          <select
+                            value={formData[col] || ''}
+                            onChange={(e) => handleInputChange(col, e.target.value)}
+                            className="form-select"
+                          >
+                            <option value="">Select...</option>
+                            {vocab
+                              .filter(v => v !== null)
+                              .map(option => (
+                                <option key={option} value={option}>
+                                  {option}
+                                </option>
+                              ))}
+                          </select>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
 
                 <button onClick={handlePredict} className="predict-button">
@@ -394,7 +442,12 @@ const DepressionPredictionApp = () => {
 
             {activeTab === 'dashboard' && (
               <div className="tab-content">
-                {metadata && (
+                {!csvData ? (
+                  <div className="upload-container">
+                    <div className="spinner"></div>
+                    <p className="upload-text">Loading dataset...</p>
+                  </div>
+                ) : metadata ? (
                   <>
                     <div className="stats-grid">
                       <div className="stat-card stat-blue">
@@ -418,58 +471,68 @@ const DepressionPredictionApp = () => {
                     <div className="charts-grid">
                       <div className="chart-card">
                         <h3 className="chart-title">Age Distribution</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                          <BarChart data={getAgeDistribution()}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="range" />
-                            <YAxis />
-                            <Tooltip />
-                            <Bar dataKey="count" fill="#6366f1" />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        {getAgeDistribution().length > 0 && (
+                          <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={getAgeDistribution()}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="range" />
+                              <YAxis />
+                              <Tooltip />
+                              <Bar dataKey="count" fill="#6366f1" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
 
                       <div className="chart-card">
                         <h3 className="chart-title">Class Balance</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                          <PieChart>
-                            <Pie
-                              data={[
-                                { name: 'Not Depressed', value: metadata.classBalance.negative },
-                                { name: 'Depressed', value: metadata.classBalance.positive }
-                              ]}
-                              cx="50%"
-                              cy="50%"
-                              labelLine={false}
-                              label={entry => `${entry.name}: ${entry.value}`}
-                              outerRadius={80}
-                              fill="#8884d8"
-                              dataKey="value"
-                            >
-                              <Cell fill="#10b981" />
-                              <Cell fill="#ef4444" />
-                            </Pie>
-                            <Tooltip />
-                          </PieChart>
-                        </ResponsiveContainer>
+                        {metadata.classBalance && (
+                          <ResponsiveContainer width="100%" height={250}>
+                            <PieChart>
+                              <Pie
+                                data={[
+                                  { name: 'Not Depressed', value: metadata.classBalance.negative },
+                                  { name: 'Depressed', value: metadata.classBalance.positive }
+                                ]}
+                                cx="50%"
+                                cy="50%"
+                                labelLine={false}
+                                label={entry => `${entry.name}: ${entry.value}`}
+                                outerRadius={80}
+                                fill="#8884d8"
+                                dataKey="value"
+                              >
+                                <Cell fill="#10b981" />
+                                <Cell fill="#ef4444" />
+                              </Pie>
+                              <Tooltip />
+                            </PieChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
 
                       <div className="chart-card chart-full">
                         <h3 className="chart-title">Academic Pressure vs Depression</h3>
-                        <ResponsiveContainer width="100%" height={250}>
-                          <BarChart data={getPressureAnalysis()}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="level" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Bar dataKey="Depressed" fill="#ef4444" />
-                            <Bar dataKey="Not Depressed" fill="#10b981" />
-                          </BarChart>
-                        </ResponsiveContainer>
+                        {getPressureAnalysis().length > 0 && (
+                          <ResponsiveContainer width="100%" height={250}>
+                            <BarChart data={getPressureAnalysis()}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="level" />
+                              <YAxis />
+                              <Tooltip />
+                              <Legend />
+                              <Bar dataKey="Depressed" fill="#ef4444" />
+                              <Bar dataKey="Not Depressed" fill="#10b981" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )}
                       </div>
                     </div>
                   </>
+                ) : (
+                  <div className="upload-container">
+                    <p className="upload-text">No data available</p>
+                  </div>
                 )}
               </div>
             )}
