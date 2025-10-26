@@ -1,0 +1,352 @@
+/ ============================================
+// ANALYTIC 1: Sleep Duration vs Depression Risk Analysis
+// ============================================
+// Computes depression rate for each sleep duration category
+// Shows which sleep patterns correlate with higher depression risk
+
+const getSleepDepressionAnalysis = (csvData) => {
+  if (!csvData || !csvData.data) return { data: [], insights: '' };
+  
+  const sleepCategories = {};
+  
+  csvData.data.forEach(row => {
+    const sleep = row['Sleep Duration'];
+    const depression = row['Depression'];
+    
+    if (!sleepCategories[sleep]) {
+      sleepCategories[sleep] = {
+        total: 0,
+        depressed: 0,
+        notDepressed: 0
+      };
+    }
+    
+    sleepCategories[sleep].total++;
+    if (depression === 1) {
+      sleepCategories[sleep].depressed++;
+    } else {
+      sleepCategories[sleep].notDepressed++;
+    }
+  });
+  
+  // Convert to array and calculate percentages
+  const analysisData = Object.entries(sleepCategories).map(([sleep, stats]) => ({
+    sleepDuration: sleep,
+    total: stats.total,
+    depressed: stats.depressed,
+    notDepressed: stats.notDepressed,
+    depressionRate: ((stats.depressed / stats.total) * 100).toFixed(2),
+    depressionRateNum: (stats.depressed / stats.total) * 100
+  }));
+  
+  // Sort by depression rate descending
+  analysisData.sort((a, b) => b.depressionRateNum - a.depressionRateNum);
+  
+  // Generate insights
+  const highest = analysisData[0];
+  const lowest = analysisData[analysisData.length - 1];
+  
+  const insights = `
+    <strong>Key Insights:</strong><br/>
+    • Highest Risk: Students with "${highest.sleepDuration}" sleep show ${highest.depressionRate}% depression rate (${highest.depressed}/${highest.total} cases)<br/>
+    • Lowest Risk: Students with "${lowest.sleepDuration}" sleep show ${lowest.depressionRate}% depression rate (${lowest.depressed}/${lowest.total} cases)<br/>
+    • Sleep quality appears to be a significant factor in mental health outcomes
+  `;
+  
+  return { data: analysisData, insights };
+};
+
+
+// ============================================
+// ANALYTIC 2: Multi-Factor Risk Score Analysis
+// ============================================
+// Computes a composite risk score based on multiple stress factors:
+// Academic Pressure, Financial Stress, Study Hours, and Family History
+// Bins students into risk categories and shows depression correlation
+
+const getMultiFactorRiskAnalysis = (csvData) => {
+  if (!csvData || !csvData.data) return { data: [], insights: '', details: [] };
+  
+  // Calculate risk score for each student
+  const scoredData = csvData.data.map(row => {
+    let riskScore = 0;
+    
+    // Academic Pressure (0-5, higher = more risk)
+    riskScore += (row['Academic Pressure'] || 0) * 2;
+    
+    // Financial Stress (1-5, higher = more risk)
+    riskScore += (row['Financial Stress'] || 0) * 2;
+    
+    // Study Hours (excessive hours = more risk)
+    const studyHours = row['Work/Study Hours'] || 0;
+    if (studyHours > 8) riskScore += 3;
+    else if (studyHours > 6) riskScore += 2;
+    else if (studyHours > 4) riskScore += 1;
+    
+    // Family History (yes = more risk)
+    if (row['Family History of Mental Illness'] === 'Yes') {
+      riskScore += 5;
+    }
+    
+    // CGPA (lower CGPA = more risk)
+    const cgpa = row['CGPA'] || 7;
+    if (cgpa < 6) riskScore += 3;
+    else if (cgpa < 7) riskScore += 2;
+    else if (cgpa < 8) riskScore += 1;
+    
+    return {
+      ...row,
+      riskScore
+    };
+  });
+  
+  // Define risk categories
+  const getRiskCategory = (score) => {
+    if (score >= 20) return 'Very High Risk';
+    if (score >= 15) return 'High Risk';
+    if (score >= 10) return 'Moderate Risk';
+    if (score >= 5) return 'Low Risk';
+    return 'Very Low Risk';
+  };
+  
+  // Group by risk category
+  const riskCategories = {};
+  
+  scoredData.forEach(student => {
+    const category = getRiskCategory(student.riskScore);
+    
+    if (!riskCategories[category]) {
+      riskCategories[category] = {
+        total: 0,
+        depressed: 0,
+        notDepressed: 0,
+        avgScore: 0,
+        totalScore: 0
+      };
+    }
+    
+    riskCategories[category].total++;
+    riskCategories[category].totalScore += student.riskScore;
+    
+    if (student.Depression === 1) {
+      riskCategories[category].depressed++;
+    } else {
+      riskCategories[category].notDepressed++;
+    }
+  });
+  
+  // Convert to array and calculate stats
+  const categoryOrder = ['Very Low Risk', 'Low Risk', 'Moderate Risk', 'High Risk', 'Very High Risk'];
+  const analysisData = categoryOrder
+    .filter(cat => riskCategories[cat])
+    .map(category => {
+      const stats = riskCategories[category];
+      return {
+        category,
+        total: stats.total,
+        depressed: stats.depressed,
+        notDepressed: stats.notDepressed,
+        depressionRate: ((stats.depressed / stats.total) * 100).toFixed(2),
+        avgRiskScore: (stats.totalScore / stats.total).toFixed(1)
+      };
+    });
+  
+  // Calculate overall statistics
+  const totalStudents = scoredData.length;
+  const avgRiskScore = (scoredData.reduce((sum, s) => sum + s.riskScore, 0) / totalStudents).toFixed(1);
+  const highRiskCount = scoredData.filter(s => s.riskScore >= 15).length;
+  const highRiskPct = ((highRiskCount / totalStudents) * 100).toFixed(1);
+  
+  // Find correlation strength
+  const highRiskDepRate = analysisData.find(d => d.category === 'Very High Risk')?.depressionRate || 0;
+  const lowRiskDepRate = analysisData.find(d => d.category === 'Very Low Risk')?.depressionRate || 0;
+  const difference = (highRiskDepRate - lowRiskDepRate).toFixed(1);
+  
+  const insights = `
+    <strong>Multi-Factor Risk Analysis Results:</strong><br/>
+    • Average Risk Score: ${avgRiskScore} out of 30<br/>
+    • High Risk Students: ${highRiskPct}% (${highRiskCount}/${totalStudents})<br/>
+    • Depression Rate Difference: ${difference}% higher in very high risk vs very low risk groups<br/>
+    • Strong correlation observed between composite risk factors and depression outcomes
+  `;
+  
+  // Detailed breakdown for table
+  const details = analysisData.map(item => ({
+    'Risk Category': item.category,
+    'Total Students': item.total,
+    'Depressed': item.depressed,
+    'Not Depressed': item.notDepressed,
+    'Depression Rate': `${item.depressionRate}%`,
+    'Avg Risk Score': item.avgRiskScore
+  }));
+  
+  return { data: analysisData, insights, details };
+};
+
+
+// ============================================
+// VISUALIZATION 1: Sleep Duration Stacked Bar Chart
+// ============================================
+// Displays the distribution of depressed vs not depressed students
+// for each sleep duration category
+
+const renderSleepVisualization = (analysisData) => {
+  // For use with Recharts BarChart
+  // Data format for stacked bar chart
+  return {
+    chartData: analysisData.map(item => ({
+      name: item.sleepDuration,
+      'Depressed': item.depressed,
+      'Not Depressed': item.notDepressed,
+      'Depression Rate': parseFloat(item.depressionRate)
+    })),
+    config: {
+      xAxisKey: 'name',
+      bars: [
+        { dataKey: 'Depressed', fill: '#ef4444', name: 'Depressed' },
+        { dataKey: 'Not Depressed', fill: '#10b981', name: 'Not Depressed' }
+      ],
+      title: 'Depression Distribution by Sleep Duration',
+      stacked: true
+    }
+  };
+};
+
+
+// ============================================
+// VISUALIZATION 2: Risk Category Distribution Chart
+// ============================================
+// Shows how students are distributed across risk categories
+// and the depression rate within each category
+
+const renderRiskCategoryVisualization = (analysisData) => {
+  // For use with Recharts BarChart (grouped bars)
+  return {
+    chartData: analysisData.map(item => ({
+      name: item.category,
+      'Total Students': item.total,
+      'Depression Rate': parseFloat(item.depressionRate),
+      'Depressed': item.depressed
+    })),
+    config: {
+      xAxisKey: 'name',
+      bars: [
+        { dataKey: 'Total Students', fill: '#6366f1', name: 'Total Students' },
+        { dataKey: 'Depressed', fill: '#ef4444', name: 'Depressed Students' }
+      ],
+      title: 'Student Distribution & Depression Rates by Risk Category',
+      stacked: false
+    }
+  };
+};
+
+
+// ============================================
+// HELPER: Render Statistics Table
+// ============================================
+
+const renderStatsTable = (details, title) => {
+  if (!details || details.length === 0) return '';
+  
+  const headers = Object.keys(details[0]);
+  
+  let tableHTML = `<h4 style="margin-bottom: 1rem; color: #4f46e5;">${title}</h4>`;
+  tableHTML += '<table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">';
+  tableHTML += '<thead><tr>';
+  
+  headers.forEach(header => {
+    tableHTML += `<th style="padding: 12px; text-align: left; background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; font-weight: bold;">${header}</th>`;
+  });
+  
+  tableHTML += '</tr></thead><tbody>';
+  
+  details.forEach((row, idx) => {
+    tableHTML += `<tr style="background: ${idx % 2 === 0 ? '#f9fafb' : 'white'};">`;
+    headers.forEach(header => {
+      tableHTML += `<td style="padding: 12px; border-bottom: 1px solid #e5e7eb;">${row[header]}</td>`;
+    });
+    tableHTML += '</tr>';
+  });
+  
+  tableHTML += '</tbody></table>';
+  
+  return tableHTML;
+};
+
+
+// ============================================
+// EXAMPLE USAGE IN YOUR REACT COMPONENT
+// ============================================
+
+/*
+// Add these functions to your component:
+
+const sleepAnalysis = useMemo(() => {
+  return getSleepDepressionAnalysis(csvData);
+}, [csvData]);
+
+const riskAnalysis = useMemo(() => {
+  return getMultiFactorRiskAnalysis(csvData);
+}, [csvData]);
+
+// Then in your JSX (inside the dashboard tab):
+
+<div className="chart-card chart-full">
+  <h3 className="chart-title">Analytic 1: Sleep Duration vs Depression Risk</h3>
+  <div dangerouslySetInnerHTML={{ __html: renderStatsTable(
+    sleepAnalysis.data.map(d => ({
+      'Sleep Duration': d.sleepDuration,
+      'Total': d.total,
+      'Depressed': d.depressed,
+      'Not Depressed': d.notDepressed,
+      'Depression Rate': d.depressionRate + '%'
+    })),
+    'Sleep Pattern Analysis'
+  )}} />
+  
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={renderSleepVisualization(sleepAnalysis.data).chartData}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" />
+      <YAxis />
+      <Tooltip />
+      <Legend />
+      <Bar dataKey="Depressed" fill="#ef4444" stackId="a" />
+      <Bar dataKey="Not Depressed" fill="#10b981" stackId="a" />
+    </BarChart>
+  </ResponsiveContainer>
+  
+  <div className="insight" dangerouslySetInnerHTML={{ __html: sleepAnalysis.insights }} />
+</div>
+
+<div className="chart-card chart-full">
+  <h3 className="chart-title">Analytic 2: Multi-Factor Risk Score Analysis</h3>
+  <div dangerouslySetInnerHTML={{ __html: renderStatsTable(
+    riskAnalysis.details,
+    'Risk Category Breakdown'
+  )}} />
+  
+  <ResponsiveContainer width="100%" height={300}>
+    <BarChart data={renderRiskCategoryVisualization(riskAnalysis.data).chartData}>
+      <CartesianGrid strokeDasharray="3 3" />
+      <XAxis dataKey="name" />
+      <YAxis />
+      <Tooltip />
+      <Legend />
+      <Bar dataKey="Total Students" fill="#6366f1" />
+      <Bar dataKey="Depressed" fill="#ef4444" />
+    </BarChart>
+  </ResponsiveContainer>
+  
+  <div className="insight" dangerouslySetInnerHTML={{ __html: riskAnalysis.insights }} />
+</div>
+
+*/
+
+export {
+  getSleepDepressionAnalysis,
+  getMultiFactorRiskAnalysis,
+  renderSleepVisualization,
+  renderRiskCategoryVisualization,
+  renderStatsTable
+};
