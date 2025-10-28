@@ -277,47 +277,92 @@ const DepressionPredictionApp = () => {
       { name: '30-33', min: 30, max: 33 }
     ];
 
-    const analysis = ageBins.map(bin => {
+    // Define CGPA ranges using whole numbers (5-10 only)
+    const cgpaRanges = [
+      { name: '5', min: 5, max: 6 },
+      { name: '6', min: 6, max: 7 },
+      { name: '7', min: 7, max: 8 },
+      { name: '8', min: 8, max: 9 },
+      { name: '9', min: 9, max: 10 },
+      { name: '10', min: 10, max: 11 }
+    ];
+
+    // Create separate datasets for each age group (for multiple histograms)
+    const histogramData = cgpaRanges.map(range => {
+      const dataPoint = { cgpa: range.name };
+      
+      ageBins.forEach(bin => {
+        const studentsInBin = csvData.data.filter(row =>
+          row.Age >= bin.min && row.Age <= bin.max
+        );
+        
+        const cgpaValues = studentsInBin.map(s => s.CGPA).filter(c => !isNaN(c));
+        
+        // Count students in this CGPA range
+        const count = cgpaValues.filter(cgpa => 
+          cgpa >= range.min && cgpa < range.max
+        ).length;
+        
+        dataPoint[bin.name] = count;
+      });
+      
+      return dataPoint;
+    });
+
+    // Calculate stats for table
+    const tableData = ageBins.map(bin => {
       const studentsInBin = csvData.data.filter(row =>
         row.Age >= bin.min && row.Age <= bin.max
       );
-
+      
       const cgpaValues = studentsInBin.map(s => s.CGPA).filter(c => !isNaN(c));
       const avgCGPA = cgpaValues.length > 0
         ? (cgpaValues.reduce((a, b) => a + b, 0) / cgpaValues.length).toFixed(2)
         : 0;
-      const minCGPA = cgpaValues.length > 0 ? Math.min(...cgpaValues).toFixed(2) : 0;
-      const maxCGPA = cgpaValues.length > 0 ? Math.max(...cgpaValues).toFixed(2) : 0;
-
-      return {
-        ageGroup: bin.name,
-        count: studentsInBin.length,
-        avgCGPA: parseFloat(avgCGPA),
-        minCGPA: parseFloat(minCGPA),
-        maxCGPA: parseFloat(maxCGPA)
+      
+      const row = {
+        'Age Group': bin.name,
+        'Students': studentsInBin.length,
+        'Avg CGPA': avgCGPA
       };
+      
+      cgpaRanges.forEach(range => {
+        const count = cgpaValues.filter(cgpa => 
+          cgpa >= range.min && cgpa < range.max
+        ).length;
+        row[`CGPA ${range.name}`] = count;
+      });
+      
+      return row;
     });
 
-    const tableData = analysis.map(item => ({
-      'Age Group': item.ageGroup,
-      'Students': item.count,
-      'Avg CGPA': item.avgCGPA.toFixed(2),
-      'Min CGPA': item.minCGPA.toFixed(2),
-      'Max CGPA': item.maxCGPA.toFixed(2)
-    }));
-
-    const highestAvg = analysis.reduce((max, curr) =>
-      curr.avgCGPA > max.avgCGPA ? curr : max
+    // Calculate insights
+    const allCGPAs = csvData.data.map(s => s.CGPA).filter(c => !isNaN(c));
+    const overallAvg = (allCGPAs.reduce((a, b) => a + b, 0) / allCGPAs.length).toFixed(2);
+    
+    const avgByAge = ageBins.map(bin => {
+      const studentsInBin = csvData.data.filter(row =>
+        row.Age >= bin.min && row.Age <= bin.max
+      );
+      const cgpaValues = studentsInBin.map(s => s.CGPA).filter(c => !isNaN(c));
+      const avg = cgpaValues.length > 0
+        ? (cgpaValues.reduce((a, b) => a + b, 0) / cgpaValues.length)
+        : 0;
+      return { ageGroup: bin.name, avg };
+    });
+    
+    const highestAvg = avgByAge.reduce((max, curr) =>
+      curr.avg > max.avg ? curr : max
     );
 
     const insights = `
-      <strong>CGPA Performance by Age:</strong><br/>
-      • Highest Average CGPA: ${highestAvg.ageGroup} age group (${highestAvg.avgCGPA.toFixed(2)})<br/>
-      • Overall CGPA range: ${Math.min(...analysis.map(a => a.minCGPA)).toFixed(2)} - ${Math.max(...analysis.map(a => a.maxCGPA)).toFixed(2)}<br/>
-      • Academic performance varies across different age demographics
+      <strong>CGPA Distribution by Age:</strong><br/>
+      • Highest Average CGPA: ${highestAvg.ageGroup} age group (${highestAvg.avg.toFixed(2)})<br/>
+      • Overall Average CGPA: ${overallAvg}<br/>
+      • Histograms show CGPA frequency distribution (5-10 scale) for each age group
     `;
 
-    return { data: analysis, insights, tableData };
+    return { data: histogramData, insights, tableData };
   }, [csvData]);
 
   // ============================================
@@ -333,166 +378,167 @@ const DepressionPredictionApp = () => {
       { name: '30-33', min: 30, max: 33 }
     ];
 
-    const analysis = ageBins.map(bin => {
+    // Define satisfaction levels (1-5)
+    const satisfactionLevels = [
+      { name: '1', value: 1 },
+      { name: '2', value: 2 },
+      { name: '3', value: 3 },
+      { name: '4', value: 4 },
+      { name: '5', value: 5 }
+    ];
+
+    // Create separate datasets for each age group (for multiple histograms)
+    const histogramData = satisfactionLevels.map(level => {
+      const dataPoint = { satisfaction: level.name };
+      
+      ageBins.forEach(bin => {
+        const studentsInBin = csvData.data.filter(row =>
+          row.Age >= bin.min && row.Age <= bin.max
+        );
+        
+        const satisfactionValues = studentsInBin.map(s => s['Study Satisfaction']).filter(s => !isNaN(s));
+        
+        // Count students with this satisfaction level
+        const count = satisfactionValues.filter(sat => sat === level.value).length;
+        
+        dataPoint[bin.name] = count;
+      });
+      
+      return dataPoint;
+    });
+
+    // Calculate stats for table
+    const tableData = ageBins.map(bin => {
       const studentsInBin = csvData.data.filter(row =>
         row.Age >= bin.min && row.Age <= bin.max
       );
-
+      
       const satisfactionValues = studentsInBin.map(s => s['Study Satisfaction']).filter(s => !isNaN(s));
       const avgSatisfaction = satisfactionValues.length > 0
         ? (satisfactionValues.reduce((a, b) => a + b, 0) / satisfactionValues.length).toFixed(2)
         : 0;
-
-      // Count by satisfaction level
-      const satisfactionCounts = {};
-      satisfactionValues.forEach(val => {
-        satisfactionCounts[val] = (satisfactionCounts[val] || 0) + 1;
-      });
-
-      return {
-        ageGroup: bin.name,
-        count: studentsInBin.length,
-        avgSatisfaction: parseFloat(avgSatisfaction),
-        satisfactionCounts
+      
+      const row = {
+        'Age Group': bin.name,
+        'Students': studentsInBin.length,
+        'Avg Satisfaction': avgSatisfaction
       };
+      
+      satisfactionLevels.forEach(level => {
+        const count = satisfactionValues.filter(sat => sat === level.value).length;
+        row[`Rating ${level.name}`] = count;
+      });
+      
+      return row;
     });
 
-    const tableData = analysis.map(item => ({
-      'Age Group': item.ageGroup,
-      'Students': item.count,
-      'Avg Satisfaction': item.avgSatisfaction.toFixed(2),
-      'Rating 1': item.satisfactionCounts[1] || 0,
-      'Rating 2': item.satisfactionCounts[2] || 0,
-      'Rating 3': item.satisfactionCounts[3] || 0,
-      'Rating 4': item.satisfactionCounts[4] || 0,
-      'Rating 5': item.satisfactionCounts[5] || 0
-    }));
-
-    const highestSat = analysis.reduce((max, curr) =>
-      curr.avgSatisfaction > max.avgSatisfaction ? curr : max
+    // Calculate insights
+    const allSatisfaction = csvData.data.map(s => s['Study Satisfaction']).filter(s => !isNaN(s));
+    const overallAvg = (allSatisfaction.reduce((a, b) => a + b, 0) / allSatisfaction.length).toFixed(2);
+    
+    const avgByAge = ageBins.map(bin => {
+      const studentsInBin = csvData.data.filter(row =>
+        row.Age >= bin.min && row.Age <= bin.max
+      );
+      const satisfactionValues = studentsInBin.map(s => s['Study Satisfaction']).filter(s => !isNaN(s));
+      const avg = satisfactionValues.length > 0
+        ? (satisfactionValues.reduce((a, b) => a + b, 0) / satisfactionValues.length)
+        : 0;
+      return { ageGroup: bin.name, avg };
+    });
+    
+    const highestSat = avgByAge.reduce((max, curr) =>
+      curr.avg > max.avg ? curr : max
     );
 
     const insights = `
       <strong>Study Satisfaction by Age:</strong><br/>
-      • Highest Satisfaction: ${highestSat.ageGroup} age group (${highestSat.avgSatisfaction.toFixed(2)}/5)<br/>
-      • Satisfaction levels vary across age demographics<br/>
-      • Younger vs older students show different satisfaction patterns
+      • Highest Average Satisfaction: ${highestSat.ageGroup} age group (${highestSat.avg.toFixed(2)}/5)<br/>
+      • Overall Average Satisfaction: ${overallAvg}/5<br/>
+      • Histograms show satisfaction level distribution (1-5 scale) for each age group
     `;
 
-    return { data: analysis, insights, tableData };
+    return { data: histogramData, insights, tableData };
   }, [csvData]);
 
   // ============================================
-  // ANALYTIC 6: Correlation Matrix + Age Distribution
+  // ANALYTIC 6: Feature Correlations with Depression
   // ============================================
   const correlationAgeAnalysis = useMemo(() => {
-    if (!csvData || !csvData.data) return { correlations: [], insights: '', ageCorrelations: [] };
+    if (!csvData || !csvData.data) return { correlations: [], insights: '', tableData: [], chartData: [] };
 
-    // Overall correlations
-    const numericFeatures = ['Age', 'Academic Pressure', 'CGPA',
-      'Study Satisfaction', 'Work/Study Hours',
-      'Financial Stress', 'Sleep Duration'];
-
-    const correlationMatrix = [];
-
-    for (let i = 0; i < numericFeatures.length; i++) {
-      for (let j = i + 1; j < numericFeatures.length; j++) {
-        const feature1 = numericFeatures[i];
-        const feature2 = numericFeatures[j];
-
-        const values1 = csvData.data
-          .map(row => {
-            if (feature1 === 'Sleep Duration') {
-              const sleepMap = {
-                'Less than 5 hours': 4,
-                '5-6 hours': 5.5,
-                '7-8 hours': 7.5,
-                'More than 8 hours': 9
-              };
-              return sleepMap[row[feature1]] || 0;
-            }
-            return row[feature1];
-          })
-          .filter(v => v != null && !isNaN(v));
-
-        const values2 = csvData.data
-          .map(row => {
-            if (feature2 === 'Sleep Duration') {
-              const sleepMap = {
-                'Less than 5 hours': 4,
-                '5-6 hours': 5.5,
-                '7-8 hours': 7.5,
-                'More than 8 hours': 9
-              };
-              return sleepMap[row[feature2]] || 0;
-            }
-            return row[feature2];
-          })
-          .filter(v => v != null && !isNaN(v));
-
-        if (values1.length > 0 && values2.length > 0) {
-          const corr = calculateCorrelation(values1, values2);
-          correlationMatrix.push({
-            feature1,
-            feature2,
-            correlation: corr.toFixed(3),
-            strength: Math.abs(corr) > 0.7 ? 'Strong' :
-              Math.abs(corr) > 0.4 ? 'Moderate' : 'Weak'
-          });
-        }
-      }
-    }
-
-    // Sort by absolute correlation value
-    correlationMatrix.sort((a, b) => Math.abs(parseFloat(b.correlation)) - Math.abs(parseFloat(a.correlation)));
-
-    // Age-specific correlations
-    const ageBins = [
-      { name: '18-21', min: 18, max: 21 },
-      { name: '22-25', min: 22, max: 25 },
-      { name: '26-29', min: 26, max: 29 },
-      { name: '30-33', min: 30, max: 33 }
+    // All numeric features to correlate with Depression
+    const numericFeatures = [
+      'Age', 
+      'Academic Pressure', 
+      'CGPA',
+      'Study Satisfaction', 
+      'Work/Study Hours',
+      'Financial Stress'
     ];
 
-    const ageCorrelations = ageBins.map(bin => {
-      const studentsInBin = csvData.data.filter(row =>
-        row.Age >= bin.min && row.Age <= bin.max
-      );
+    // Calculate correlation of each feature with Depression
+    const featureCorrelations = numericFeatures.map(feature => {
+      const featureValues = csvData.data
+        .map(row => {
+          return row[feature];
+        })
+        .filter(v => v != null && !isNaN(v));
 
-      const academicPressure = studentsInBin.map(s => s['Academic Pressure']).filter(v => !isNaN(v));
-      const depression = studentsInBin.map(s => s['Depression']).filter(v => !isNaN(v));
+      const depressionValues = csvData.data
+        .filter(row => row[feature] != null && !isNaN(row[feature]))
+        .map(row => row['Depression']);
 
-      const corr = academicPressure.length > 0 && depression.length > 0
-        ? calculateCorrelation(academicPressure, depression)
-        : 0;
+      const correlation = calculateCorrelation(featureValues, depressionValues);
 
       return {
-        ageGroup: bin.name,
-        count: studentsInBin.length,
-        correlation: corr.toFixed(3)
+        feature,
+        correlation: parseFloat(correlation.toFixed(3)),
+        absCorrelation: Math.abs(correlation)
       };
     });
 
-    const topCorrelations = correlationMatrix.slice(0, 5);
+
+    // Sort by absolute correlation (strongest first)
+    featureCorrelations.sort((a, b) => b.absCorrelation - a.absCorrelation);
+
+    // Prepare chart data - simpler approach
+    const chartData = featureCorrelations.map(item => ({
+      feature: item.feature,
+      value: Math.abs(item.correlation),
+      correlation: item.correlation,
+      fill: item.correlation > 0 ? '#ef4444' : '#10b981'
+    }));
+
+    // Table data
+    const tableData = featureCorrelations.map(item => ({
+      'Feature': item.feature,
+      'Correlation': item.correlation,
+      'Strength': Math.abs(item.correlation) > 0.5 ? 'Strong' : 
+                  Math.abs(item.correlation) > 0.3 ? 'Moderate' : 'Weak',
+      'Direction': item.correlation > 0 ? 'Positive' : 'Negative'
+    }));
+
+    // Generate insights
+    const strongest = featureCorrelations[0];
+    const weakest = featureCorrelations[featureCorrelations.length - 1];
+    const positiveCorrs = featureCorrelations.filter(f => f.correlation > 0);
+    const negativeCorrs = featureCorrelations.filter(f => f.correlation < 0);
 
     const insights = `
-      <strong>Key Correlation Findings:</strong><br/>
-      • Strongest Correlation: ${topCorrelations[0].feature1} ↔ ${topCorrelations[0].feature2} (${topCorrelations[0].correlation})<br/>
-      • Total Feature Pairs Analyzed: ${correlationMatrix.length}<br/>
-      • Strong Correlations Found: ${correlationMatrix.filter(c => c.strength === 'Strong').length}<br/>
-      • Academic Pressure-Depression correlation varies by age group
+      <strong>Feature Correlations with Depression:</strong><br/>
+      • Strongest Correlation: ${strongest.feature} (${strongest.correlation > 0 ? '+' : ''}${strongest.correlation})<br/>
+      • Positive correlations (increase depression risk): ${positiveCorrs.length} features<br/>
+      • Negative correlations (decrease depression risk): ${negativeCorrs.length} features<br/>
+      • Red bars = positive correlation (higher value → higher depression)<br/>
+      • Green bars = negative correlation (higher value → lower depression)
     `;
 
-    return {
-      correlations: correlationMatrix.slice(0, 10),
-      insights,
-      ageCorrelations,
-      tableData: correlationMatrix.slice(0, 15).map(c => ({
-        'Feature 1': c.feature1,
-        'Feature 2': c.feature2,
-        'Correlation': c.correlation,
-        'Strength': c.strength
-      }))
+    return { 
+      correlations: featureCorrelations, 
+      insights, 
+      tableData,
+      chartData 
     };
   }, [csvData]);
 
@@ -967,7 +1013,7 @@ const DepressionPredictionApp = () => {
                     <div className="charts-grid">
                       {/* ANALYTIC 1: Depression Outcome Distribution */}
                       <div className="chart-card">
-                        <h3 className="chart-title">📊 Depression Outcome Distribution</h3>
+                        <h3 className="chart-title">Depression Outcome Distribution</h3>
                         {renderStatsTable(
                           depressionOutcomeAnalysis.data.map(d => ({
                             'Outcome': d.outcome,
@@ -998,7 +1044,7 @@ const DepressionPredictionApp = () => {
 
                       {/* ANALYTIC 2: Family History Distribution */}
                       <div className="chart-card">
-                        <h3 className="chart-title">🧬 Family History Distribution</h3>
+                        <h3 className="chart-title">Family History Distribution</h3>
                         {renderStatsTable(
                           familyHistoryAnalysis.data.map(d => ({
                             'Family History': d.category,
@@ -1029,17 +1075,23 @@ const DepressionPredictionApp = () => {
 
                       {/* ANALYTIC 3: CGPA Distribution Across Age Groups */}
                       <div className="chart-card chart-full">
-                        <h3 className="chart-title">📚 CGPA Distribution Across Age Groups</h3>
+                        <h3 className="chart-title">CGPA Distribution Across Age Groups</h3>
                         {renderStatsTable(cgpaAgeAnalysis.tableData, 'CGPA by Age Group')}
                         <div style={{ marginTop: '1.5rem' }}>
-                          <ResponsiveContainer width="100%" height={300}>
+                          <ResponsiveContainer width="100%" height={400}>
                             <BarChart data={cgpaAgeAnalysis.data}>
                               <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="ageGroup" />
-                              <YAxis domain={[0, 10]} />
+                              <XAxis 
+                                dataKey="cgpa" 
+                                label={{ value: 'CGPA', position: 'insideBottom', offset: -5 }}
+                              />
+                              <YAxis label={{ value: 'Number of Students', angle: -90, position: 'insideLeft' }} />
                               <Tooltip />
                               <Legend />
-                              <Bar dataKey="avgCGPA" fill="#6366f1" name="Average CGPA" />
+                              <Bar dataKey="18-21" fill="#ef4444" name="18-21 years" />
+                              <Bar dataKey="22-25" fill="#f59e0b" name="22-25 years" />
+                              <Bar dataKey="26-29" fill="#10b981" name="26-29 years" />
+                              <Bar dataKey="30-33" fill="#6366f1" name="30-33 years" />
                             </BarChart>
                           </ResponsiveContainer>
                         </div>
@@ -1048,45 +1100,80 @@ const DepressionPredictionApp = () => {
 
                       {/* ANALYTIC 4: Study Satisfaction Across Age Groups */}
                       <div className="chart-card chart-full">
-                        <h3 className="chart-title">😊 Study Satisfaction Across Age Groups</h3>
+                        <h3 className="chart-title">Study Satisfaction Across Age Groups</h3>
                         {renderStatsTable(studySatisfactionAgeAnalysis.tableData, 'Study Satisfaction by Age')}
                         <div style={{ marginTop: '1.5rem' }}>
-                          <ResponsiveContainer width="100%" height={300}>
-                            <LineChart data={studySatisfactionAgeAnalysis.data}>
+                          <ResponsiveContainer width="100%" height={400}>
+                            <BarChart data={studySatisfactionAgeAnalysis.data}>
                               <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="ageGroup" />
-                              <YAxis domain={[0, 5]} />
+                              <XAxis 
+                                dataKey="satisfaction" 
+                                label={{ value: 'Satisfaction Level', position: 'insideBottom', offset: -5 }}
+                              />
+                              <YAxis label={{ value: 'Number of Students', angle: -90, position: 'insideLeft' }} />
                               <Tooltip />
                               <Legend />
-                              <Line type="monotone" dataKey="avgSatisfaction" stroke="#10b981" strokeWidth={3} name="Avg Satisfaction" />
-                            </LineChart>
+                              <Bar dataKey="18-21" fill="#ef4444" name="18-21 years" />
+                              <Bar dataKey="22-25" fill="#f59e0b" name="22-25 years" />
+                              <Bar dataKey="26-29" fill="#10b981" name="26-29 years" />
+                              <Bar dataKey="30-33" fill="#6366f1" name="30-33 years" />
+                            </BarChart>
                           </ResponsiveContainer>
                         </div>
                         <div className="insight" dangerouslySetInnerHTML={{ __html: studySatisfactionAgeAnalysis.insights }} />
                       </div>
 
-                      {/* ANALYTIC 6: Correlation Matrix */}
+                      {/* ANALYTIC 6: Feature Correlations with Depression */}
                       <div className="chart-card chart-full">
-                        <h3 className="chart-title">🔗 Feature Correlation Matrix</h3>
-                        {renderStatsTable(correlationAgeAnalysis.tableData, 'Top Feature Correlations')}
+                        <h3 className="chart-title">Feature Correlations with Depression</h3>
+                        {renderStatsTable(correlationAgeAnalysis.tableData, 'Feature Correlation Analysis')}
                         <div style={{ marginTop: '1.5rem' }}>
-                          <h4 style={{ marginBottom: '1rem', color: '#4f46e5', fontWeight: 'bold' }}>Academic Pressure-Depression Correlation by Age</h4>
-                          <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={correlationAgeAnalysis.ageCorrelations}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="ageGroup" />
-                              <YAxis domain={[-1, 1]} />
-                              <Tooltip />
-                              <Bar dataKey="correlation" fill="#f59e0b" name="Correlation Coefficient" />
-                            </BarChart>
-                          </ResponsiveContainer>
+                          {correlationAgeAnalysis.chartData && correlationAgeAnalysis.chartData.length > 0 ? (
+                            <ResponsiveContainer width="100%" height={400}>
+                              <BarChart 
+                                data={correlationAgeAnalysis.chartData}
+                              >
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis 
+                                  dataKey="feature"
+                                  angle={-45}
+                                  textAnchor="end"
+                                  height={120}
+                                />
+                                <YAxis 
+                                  label={{ value: 'Correlation Coefficient', angle: -90, position: 'insideLeft' }}
+                                  domain={[-1, 1]}
+                                />
+                                <Tooltip 
+                                  content={({ active, payload }) => {
+                                    if (active && payload && payload.length) {
+                                      return (
+                                        <div style={{ backgroundColor: 'white', padding: '10px', border: '1px solid #ccc' }}>
+                                          <p><strong>{payload[0].payload.feature}</strong></p>
+                                          <p>Correlation: {payload[0].payload.correlation.toFixed(3)}</p>
+                                        </div>
+                                      );
+                                    }
+                                    return null;
+                                  }}
+                                />
+                                <Bar dataKey="correlation">
+                                  {correlationAgeAnalysis.chartData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={entry.fill} />
+                                  ))}
+                                </Bar>
+                              </BarChart>
+                            </ResponsiveContainer>
+                          ) : (
+                            <p>Loading chart data...</p>
+                          )}
                         </div>
                         <div className="insight" dangerouslySetInnerHTML={{ __html: correlationAgeAnalysis.insights }} />
                       </div>
 
                       {/* ANALYTIC 7: Sleep Duration Analysis */}
                       <div className="chart-card chart-full">
-                        <h3 className="chart-title">😴 Sleep Duration vs Depression Risk</h3>
+                        <h3 className="chart-title">Sleep Duration vs Depression Risk</h3>
                         {renderStatsTable(
                           sleepAnalysis.data.map(d => ({
                             'Sleep Duration': d.sleepDuration,
@@ -1119,7 +1206,7 @@ const DepressionPredictionApp = () => {
 
                       {/* ANALYTIC 8: Multi-Factor Risk Score */}
                       <div className="chart-card chart-full">
-                        <h3 className="chart-title">🎯 Multi-Factor Risk Score Analysis</h3>
+                        <h3 className="chart-title">Multi-Factor Risk Score Analysis</h3>
                         <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
                           Composite risk score based on: Academic Pressure (×2), Financial Stress (×2), Study Hours, Family History (+5), and CGPA
                         </p>
