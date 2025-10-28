@@ -7,19 +7,19 @@ import './App.css';
 const calculateCorrelation = (x, y) => {
   const n = Math.min(x.length, y.length);
   if (n === 0) return 0;
-  
+
   const xArr = x.slice(0, n);
   const yArr = y.slice(0, n);
-  
+
   const sumX = xArr.reduce((a, b) => a + b, 0);
   const sumY = yArr.reduce((a, b) => a + b, 0);
   const sumXY = xArr.reduce((sum, xi, i) => sum + xi * yArr[i], 0);
   const sumX2 = xArr.reduce((sum, xi) => sum + xi * xi, 0);
   const sumY2 = yArr.reduce((sum, yi) => sum + yi * yi, 0);
-  
+
   const numerator = n * sumXY - sumX * sumY;
   const denominator = Math.sqrt((n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY));
-  
+
   return denominator === 0 ? 0 : numerator / denominator;
 };
 
@@ -40,7 +40,7 @@ const DepressionPredictionApp = () => {
         const [modelRes, preprocRes, csvRes] = await Promise.all([
           fetch('dt_model_v1.json'),
           fetch('preproc_v1.json'),
-          fetch('student_depression_dataset.csv')
+          fetch('cleaned_dataset.csv')
         ]);
 
         const modelData = await modelRes.json();
@@ -197,10 +197,10 @@ const DepressionPredictionApp = () => {
   // ============================================
   const depressionOutcomeAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { data: [], insights: '' };
-    
+
     let depressed = 0;
     let notDepressed = 0;
-    
+
     csvData.data.forEach(row => {
       if (row['Depression'] === 1) {
         depressed++;
@@ -208,23 +208,23 @@ const DepressionPredictionApp = () => {
         notDepressed++;
       }
     });
-    
+
     const total = csvData.data.length;
     const depressedPct = ((depressed / total) * 100).toFixed(2);
     const notDepressedPct = ((notDepressed / total) * 100).toFixed(2);
-    
+
     const data = [
       { outcome: 'Depressed', count: depressed, percentage: depressedPct },
       { outcome: 'Not Depressed', count: notDepressed, percentage: notDepressedPct }
     ];
-    
+
     const insights = `
       <strong>Depression Outcome Distribution:</strong><br/>
       • Depressed Students: ${depressed} (${depressedPct}%)<br/>
       • Not Depressed Students: ${notDepressed} (${notDepressedPct}%)<br/>
       • Total Dataset Size: ${total} students
     `;
-    
+
     return { data, insights };
   }, [csvData]);
 
@@ -233,10 +233,10 @@ const DepressionPredictionApp = () => {
   // ============================================
   const familyHistoryAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { data: [], insights: '' };
-    
+
     let yesCount = 0;
     let noCount = 0;
-    
+
     csvData.data.forEach(row => {
       if (row['Family History of Mental Illness'] === 'Yes') {
         yesCount++;
@@ -244,23 +244,23 @@ const DepressionPredictionApp = () => {
         noCount++;
       }
     });
-    
+
     const total = csvData.data.length;
     const yesPct = ((yesCount / total) * 100).toFixed(2);
     const noPct = ((noCount / total) * 100).toFixed(2);
-    
+
     const data = [
       { category: 'Yes', count: yesCount, percentage: yesPct },
       { category: 'No', count: noCount, percentage: noPct }
     ];
-    
+
     const insights = `
       <strong>Family History of Mental Illness:</strong><br/>
       • Yes: ${yesCount} students (${yesPct}%)<br/>
       • No: ${noCount} students (${noPct}%)<br/>
       • Family history present in ${yesPct}% of the population
     `;
-    
+
     return { data, insights };
   }, [csvData]);
 
@@ -269,26 +269,26 @@ const DepressionPredictionApp = () => {
   // ============================================
   const cgpaAgeAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { data: [], insights: '', tableData: [] };
-    
+
     const ageBins = [
       { name: '18-21', min: 18, max: 21 },
       { name: '22-25', min: 22, max: 25 },
       { name: '26-29', min: 26, max: 29 },
       { name: '30-33', min: 30, max: 33 }
     ];
-    
+
     const analysis = ageBins.map(bin => {
-      const studentsInBin = csvData.data.filter(row => 
+      const studentsInBin = csvData.data.filter(row =>
         row.Age >= bin.min && row.Age <= bin.max
       );
-      
+
       const cgpaValues = studentsInBin.map(s => s.CGPA).filter(c => !isNaN(c));
-      const avgCGPA = cgpaValues.length > 0 
+      const avgCGPA = cgpaValues.length > 0
         ? (cgpaValues.reduce((a, b) => a + b, 0) / cgpaValues.length).toFixed(2)
         : 0;
       const minCGPA = cgpaValues.length > 0 ? Math.min(...cgpaValues).toFixed(2) : 0;
       const maxCGPA = cgpaValues.length > 0 ? Math.max(...cgpaValues).toFixed(2) : 0;
-      
+
       return {
         ageGroup: bin.name,
         count: studentsInBin.length,
@@ -297,7 +297,7 @@ const DepressionPredictionApp = () => {
         maxCGPA: parseFloat(maxCGPA)
       };
     });
-    
+
     const tableData = analysis.map(item => ({
       'Age Group': item.ageGroup,
       'Students': item.count,
@@ -305,18 +305,18 @@ const DepressionPredictionApp = () => {
       'Min CGPA': item.minCGPA.toFixed(2),
       'Max CGPA': item.maxCGPA.toFixed(2)
     }));
-    
-    const highestAvg = analysis.reduce((max, curr) => 
+
+    const highestAvg = analysis.reduce((max, curr) =>
       curr.avgCGPA > max.avgCGPA ? curr : max
     );
-    
+
     const insights = `
       <strong>CGPA Performance by Age:</strong><br/>
       • Highest Average CGPA: ${highestAvg.ageGroup} age group (${highestAvg.avgCGPA.toFixed(2)})<br/>
       • Overall CGPA range: ${Math.min(...analysis.map(a => a.minCGPA)).toFixed(2)} - ${Math.max(...analysis.map(a => a.maxCGPA)).toFixed(2)}<br/>
       • Academic performance varies across different age demographics
     `;
-    
+
     return { data: analysis, insights, tableData };
   }, [csvData]);
 
@@ -325,30 +325,30 @@ const DepressionPredictionApp = () => {
   // ============================================
   const studySatisfactionAgeAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { data: [], insights: '', tableData: [] };
-    
+
     const ageBins = [
       { name: '18-21', min: 18, max: 21 },
       { name: '22-25', min: 22, max: 25 },
       { name: '26-29', min: 26, max: 29 },
       { name: '30-33', min: 30, max: 33 }
     ];
-    
+
     const analysis = ageBins.map(bin => {
-      const studentsInBin = csvData.data.filter(row => 
+      const studentsInBin = csvData.data.filter(row =>
         row.Age >= bin.min && row.Age <= bin.max
       );
-      
+
       const satisfactionValues = studentsInBin.map(s => s['Study Satisfaction']).filter(s => !isNaN(s));
-      const avgSatisfaction = satisfactionValues.length > 0 
+      const avgSatisfaction = satisfactionValues.length > 0
         ? (satisfactionValues.reduce((a, b) => a + b, 0) / satisfactionValues.length).toFixed(2)
         : 0;
-      
+
       // Count by satisfaction level
       const satisfactionCounts = {};
       satisfactionValues.forEach(val => {
         satisfactionCounts[val] = (satisfactionCounts[val] || 0) + 1;
       });
-      
+
       return {
         ageGroup: bin.name,
         count: studentsInBin.length,
@@ -356,7 +356,7 @@ const DepressionPredictionApp = () => {
         satisfactionCounts
       };
     });
-    
+
     const tableData = analysis.map(item => ({
       'Age Group': item.ageGroup,
       'Students': item.count,
@@ -367,78 +367,19 @@ const DepressionPredictionApp = () => {
       'Rating 4': item.satisfactionCounts[4] || 0,
       'Rating 5': item.satisfactionCounts[5] || 0
     }));
-    
-    const highestSat = analysis.reduce((max, curr) => 
+
+    const highestSat = analysis.reduce((max, curr) =>
       curr.avgSatisfaction > max.avgSatisfaction ? curr : max
     );
-    
+
     const insights = `
       <strong>Study Satisfaction by Age:</strong><br/>
       • Highest Satisfaction: ${highestSat.ageGroup} age group (${highestSat.avgSatisfaction.toFixed(2)}/5)<br/>
       • Satisfaction levels vary across age demographics<br/>
       • Younger vs older students show different satisfaction patterns
     `;
-    
-    return { data: analysis, insights, tableData };
-  }, [csvData]);
 
-  // ============================================
-  // ANALYTIC 5: Work Pressure vs Job Satisfaction
-  // ============================================
-  const workPressureJobSatAnalysis = useMemo(() => {
-    if (!csvData || !csvData.data) return { data: [], insights: '', tableData: [] };
-    
-    const pressureLevels = [0, 1, 2, 3, 4, 5];
-    
-    const analysis = pressureLevels.map(pressure => {
-      const studentsWithPressure = csvData.data.filter(row => 
-        row['Work Pressure'] === pressure
-      );
-      
-      const jobSatValues = studentsWithPressure
-        .map(s => s['Job Satisfaction'])
-        .filter(s => s !== null && s !== undefined && !isNaN(s));
-      
-      const avgJobSat = jobSatValues.length > 0 
-        ? (jobSatValues.reduce((a, b) => a + b, 0) / jobSatValues.length).toFixed(2)
-        : 0;
-      
-      return {
-        workPressure: pressure,
-        count: studentsWithPressure.length,
-        avgJobSatisfaction: parseFloat(avgJobSat),
-        totalJobSatRecords: jobSatValues.length
-      };
-    });
-    
-    const tableData = analysis.map(item => ({
-      'Work Pressure': item.workPressure,
-      'Students': item.count,
-      'Avg Job Satisfaction': item.avgJobSatisfaction.toFixed(2),
-      'Records with Job Sat': item.totalJobSatRecords
-    }));
-    
-    // Calculate correlation coefficient
-    const validPairs = csvData.data
-      .filter(row => row['Work Pressure'] != null && row['Job Satisfaction'] != null)
-      .map(row => ({
-        x: row['Work Pressure'],
-        y: row['Job Satisfaction']
-      }));
-    
-    const correlation = calculateCorrelation(
-      validPairs.map(p => p.x),
-      validPairs.map(p => p.y)
-    );
-    
-    const insights = `
-      <strong>Work Pressure vs Job Satisfaction:</strong><br/>
-      • Correlation Coefficient: ${correlation.toFixed(3)} ${Math.abs(correlation) > 0.5 ? '(Strong)' : Math.abs(correlation) > 0.3 ? '(Moderate)' : '(Weak)'}<br/>
-      • ${correlation < 0 ? 'Negative correlation: Higher work pressure associated with lower job satisfaction' : 'Positive correlation: Higher work pressure associated with higher job satisfaction'}<br/>
-      • Total valid data points: ${validPairs.length}
-    `;
-    
-    return { data: analysis, insights, tableData, scatterData: validPairs };
+    return { data: analysis, insights, tableData };
   }, [csvData]);
 
   // ============================================
@@ -446,19 +387,19 @@ const DepressionPredictionApp = () => {
   // ============================================
   const correlationAgeAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { correlations: [], insights: '', ageCorrelations: [] };
-    
+
     // Overall correlations
-    const numericFeatures = ['Age', 'Academic Pressure', 'Work Pressure', 'CGPA', 
-                             'Study Satisfaction', 'Job Satisfaction', 'Work/Study Hours', 
-                             'Financial Stress', 'Sleep Duration'];
-    
+    const numericFeatures = ['Age', 'Academic Pressure', 'CGPA',
+      'Study Satisfaction', 'Work/Study Hours',
+      'Financial Stress', 'Sleep Duration'];
+
     const correlationMatrix = [];
-    
+
     for (let i = 0; i < numericFeatures.length; i++) {
       for (let j = i + 1; j < numericFeatures.length; j++) {
         const feature1 = numericFeatures[i];
         const feature2 = numericFeatures[j];
-        
+
         const values1 = csvData.data
           .map(row => {
             if (feature1 === 'Sleep Duration') {
@@ -473,7 +414,7 @@ const DepressionPredictionApp = () => {
             return row[feature1];
           })
           .filter(v => v != null && !isNaN(v));
-        
+
         const values2 = csvData.data
           .map(row => {
             if (feature2 === 'Sleep Duration') {
@@ -488,23 +429,23 @@ const DepressionPredictionApp = () => {
             return row[feature2];
           })
           .filter(v => v != null && !isNaN(v));
-        
+
         if (values1.length > 0 && values2.length > 0) {
           const corr = calculateCorrelation(values1, values2);
           correlationMatrix.push({
             feature1,
             feature2,
             correlation: corr.toFixed(3),
-            strength: Math.abs(corr) > 0.7 ? 'Strong' : 
-                     Math.abs(corr) > 0.4 ? 'Moderate' : 'Weak'
+            strength: Math.abs(corr) > 0.7 ? 'Strong' :
+              Math.abs(corr) > 0.4 ? 'Moderate' : 'Weak'
           });
         }
       }
     }
-    
+
     // Sort by absolute correlation value
     correlationMatrix.sort((a, b) => Math.abs(parseFloat(b.correlation)) - Math.abs(parseFloat(a.correlation)));
-    
+
     // Age-specific correlations
     const ageBins = [
       { name: '18-21', min: 18, max: 21 },
@@ -512,28 +453,28 @@ const DepressionPredictionApp = () => {
       { name: '26-29', min: 26, max: 29 },
       { name: '30-33', min: 30, max: 33 }
     ];
-    
+
     const ageCorrelations = ageBins.map(bin => {
-      const studentsInBin = csvData.data.filter(row => 
+      const studentsInBin = csvData.data.filter(row =>
         row.Age >= bin.min && row.Age <= bin.max
       );
-      
+
       const academicPressure = studentsInBin.map(s => s['Academic Pressure']).filter(v => !isNaN(v));
       const depression = studentsInBin.map(s => s['Depression']).filter(v => !isNaN(v));
-      
+
       const corr = academicPressure.length > 0 && depression.length > 0
         ? calculateCorrelation(academicPressure, depression)
         : 0;
-      
+
       return {
         ageGroup: bin.name,
         count: studentsInBin.length,
         correlation: corr.toFixed(3)
       };
     });
-    
+
     const topCorrelations = correlationMatrix.slice(0, 5);
-    
+
     const insights = `
       <strong>Key Correlation Findings:</strong><br/>
       • Strongest Correlation: ${topCorrelations[0].feature1} ↔ ${topCorrelations[0].feature2} (${topCorrelations[0].correlation})<br/>
@@ -541,10 +482,10 @@ const DepressionPredictionApp = () => {
       • Strong Correlations Found: ${correlationMatrix.filter(c => c.strength === 'Strong').length}<br/>
       • Academic Pressure-Depression correlation varies by age group
     `;
-    
-    return { 
-      correlations: correlationMatrix.slice(0, 10), 
-      insights, 
+
+    return {
+      correlations: correlationMatrix.slice(0, 10),
+      insights,
       ageCorrelations,
       tableData: correlationMatrix.slice(0, 15).map(c => ({
         'Feature 1': c.feature1,
@@ -560,13 +501,13 @@ const DepressionPredictionApp = () => {
   // ============================================
   const sleepAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { data: [], insights: '' };
-    
+
     const sleepCategories = {};
-    
+
     csvData.data.forEach(row => {
       const sleep = row['Sleep Duration'];
       const depression = row['Depression'];
-      
+
       if (!sleepCategories[sleep]) {
         sleepCategories[sleep] = {
           total: 0,
@@ -574,7 +515,7 @@ const DepressionPredictionApp = () => {
           notDepressed: 0
         };
       }
-      
+
       sleepCategories[sleep].total++;
       if (depression === 1) {
         sleepCategories[sleep].depressed++;
@@ -582,7 +523,7 @@ const DepressionPredictionApp = () => {
         sleepCategories[sleep].notDepressed++;
       }
     });
-    
+
     const analysisData = Object.entries(sleepCategories).map(([sleep, stats]) => ({
       sleepDuration: sleep,
       total: stats.total,
@@ -591,19 +532,19 @@ const DepressionPredictionApp = () => {
       depressionRate: ((stats.depressed / stats.total) * 100).toFixed(2),
       depressionRateNum: (stats.depressed / stats.total) * 100
     }));
-    
+
     analysisData.sort((a, b) => b.depressionRateNum - a.depressionRateNum);
-    
+
     const highest = analysisData[0];
     const lowest = analysisData[analysisData.length - 1];
-    
+
     const insights = `
       <strong>Key Insights:</strong><br/>
       • Highest Risk: Students with "${highest.sleepDuration}" sleep show ${highest.depressionRate}% depression rate (${highest.depressed}/${highest.total} cases)<br/>
       • Lowest Risk: Students with "${lowest.sleepDuration}" sleep show ${lowest.depressionRate}% depression rate (${lowest.depressed}/${lowest.total} cases)<br/>
       • Sleep quality appears to be a significant factor in mental health outcomes
     `;
-    
+
     return { data: analysisData, insights };
   }, [csvData]);
 
@@ -612,33 +553,33 @@ const DepressionPredictionApp = () => {
   // ============================================
   const riskAnalysis = useMemo(() => {
     if (!csvData || !csvData.data) return { data: [], insights: '', details: [] };
-    
+
     const scoredData = csvData.data.map(row => {
       let riskScore = 0;
-      
+
       riskScore += (row['Academic Pressure'] || 0) * 2;
       riskScore += (row['Financial Stress'] || 0) * 2;
-      
+
       const studyHours = row['Work/Study Hours'] || 0;
       if (studyHours > 8) riskScore += 3;
       else if (studyHours > 6) riskScore += 2;
       else if (studyHours > 4) riskScore += 1;
-      
+
       if (row['Family History of Mental Illness'] === 'Yes') {
         riskScore += 5;
       }
-      
+
       const cgpa = row['CGPA'] || 7;
       if (cgpa < 6) riskScore += 3;
       else if (cgpa < 7) riskScore += 2;
       else if (cgpa < 8) riskScore += 1;
-      
+
       return {
         ...row,
         riskScore
       };
     });
-    
+
     const getRiskCategory = (score) => {
       if (score >= 20) return 'Very High Risk';
       if (score >= 15) return 'High Risk';
@@ -646,12 +587,12 @@ const DepressionPredictionApp = () => {
       if (score >= 5) return 'Low Risk';
       return 'Very Low Risk';
     };
-    
+
     const riskCategories = {};
-    
+
     scoredData.forEach(student => {
       const category = getRiskCategory(student.riskScore);
-      
+
       if (!riskCategories[category]) {
         riskCategories[category] = {
           total: 0,
@@ -661,17 +602,17 @@ const DepressionPredictionApp = () => {
           totalScore: 0
         };
       }
-      
+
       riskCategories[category].total++;
       riskCategories[category].totalScore += student.riskScore;
-      
+
       if (student.Depression === 1) {
         riskCategories[category].depressed++;
       } else {
         riskCategories[category].notDepressed++;
       }
     });
-    
+
     const categoryOrder = ['Very Low Risk', 'Low Risk', 'Moderate Risk', 'High Risk', 'Very High Risk'];
     const analysisData = categoryOrder
       .filter(cat => riskCategories[cat])
@@ -686,16 +627,16 @@ const DepressionPredictionApp = () => {
           avgRiskScore: (stats.totalScore / stats.total).toFixed(1)
         };
       });
-    
+
     const totalStudents = scoredData.length;
     const avgRiskScore = (scoredData.reduce((sum, s) => sum + s.riskScore, 0) / totalStudents).toFixed(1);
     const highRiskCount = scoredData.filter(s => s.riskScore >= 15).length;
     const highRiskPct = ((highRiskCount / totalStudents) * 100).toFixed(1);
-    
+
     const highRiskDepRate = analysisData.find(d => d.category === 'Very High Risk')?.depressionRate || 0;
     const lowRiskDepRate = analysisData.find(d => d.category === 'Very Low Risk')?.depressionRate || 0;
     const difference = (highRiskDepRate - lowRiskDepRate).toFixed(1);
-    
+
     const insights = `
       <strong>Multi-Factor Risk Analysis Results:</strong><br/>
       • Average Risk Score: ${avgRiskScore} out of 30<br/>
@@ -703,7 +644,7 @@ const DepressionPredictionApp = () => {
       • Depression Rate Difference: ${difference}% higher in very high risk vs very low risk groups<br/>
       • Strong correlation observed between composite risk factors and depression outcomes
     `;
-    
+
     const details = analysisData.map(item => ({
       'Risk Category': item.category,
       'Total Students': item.total,
@@ -712,16 +653,16 @@ const DepressionPredictionApp = () => {
       'Depression Rate': `${item.depressionRate}%`,
       'Avg Risk Score': item.avgRiskScore
     }));
-    
+
     return { data: analysisData, insights, details };
   }, [csvData]);
 
   // Helper function to render stats table
   const renderStatsTable = (details, title) => {
     if (!details || details.length === 0) return <div>No data available</div>;
-    
+
     const headers = Object.keys(details[0]);
-    
+
     return (
       <div>
         <h4 style={{ marginBottom: '1rem', color: '#4f46e5', fontWeight: 'bold' }}>{title}</h4>
@@ -730,11 +671,11 @@ const DepressionPredictionApp = () => {
             <thead>
               <tr>
                 {headers.map(header => (
-                  <th key={header} style={{ 
-                    padding: '12px', 
-                    textAlign: 'left', 
-                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', 
-                    color: 'white', 
+                  <th key={header} style={{
+                    padding: '12px',
+                    textAlign: 'left',
+                    background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+                    color: 'white',
                     fontWeight: 'bold',
                     whiteSpace: 'nowrap'
                   }}>
@@ -1122,34 +1063,6 @@ const DepressionPredictionApp = () => {
                           </ResponsiveContainer>
                         </div>
                         <div className="insight" dangerouslySetInnerHTML={{ __html: studySatisfactionAgeAnalysis.insights }} />
-                      </div>
-
-                      {/* ANALYTIC 5: Work Pressure vs Job Satisfaction */}
-                      <div className="chart-card chart-full">
-                        <h3 className="chart-title">💼 Work Pressure vs Job Satisfaction</h3>
-                        {renderStatsTable(workPressureJobSatAnalysis.tableData, 'Work Pressure Analysis')}
-                        <div style={{ marginTop: '1.5rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                          <ResponsiveContainer width="100%" height={300}>
-                            <BarChart data={workPressureJobSatAnalysis.data}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="workPressure" />
-                              <YAxis />
-                              <Tooltip />
-                              <Legend />
-                              <Bar dataKey="avgJobSatisfaction" fill="#7c3aed" name="Avg Job Satisfaction" />
-                            </BarChart>
-                          </ResponsiveContainer>
-                          <ResponsiveContainer width="100%" height={300}>
-                            <ScatterChart>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="x" name="Work Pressure" />
-                              <YAxis dataKey="y" name="Job Satisfaction" />
-                              <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                              <Scatter name="Students" data={workPressureJobSatAnalysis.scatterData} fill="#7c3aed" />
-                            </ScatterChart>
-                          </ResponsiveContainer>
-                        </div>
-                        <div className="insight" dangerouslySetInnerHTML={{ __html: workPressureJobSatAnalysis.insights }} />
                       </div>
 
                       {/* ANALYTIC 6: Correlation Matrix */}
