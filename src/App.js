@@ -1035,7 +1035,21 @@ const DepressionPredictionApp = () => {
                         </ResponsiveContainer>
                         <div className="insight" dangerouslySetInnerHTML={{ __html: familyHistoryAnalysis.insights }} />
                       </div>
-
+                      {/* Original Charts */}
+                      <div className="chart-card">
+                        <h3 className="chart-title">Age Distribution</h3>
+                        {getAgeDistribution().length > 0 && (
+                          <ResponsiveContainer width="214%" height={250}>
+                            <BarChart data={getAgeDistribution()}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="range" />
+                              <YAxis />
+                              <Tooltip />
+                              <Bar dataKey="count" fill="#6366f1" />
+                            </BarChart>
+                          </ResponsiveContainer>
+                        )}
+                      </div>
                       {/* ANALYTIC 3: CGPA Distribution Across Age Groups */}
                       <div className="chart-card chart-full">
                         <h3 className="chart-title">CGPA Distribution Across Age Groups</h3>
@@ -1190,22 +1204,6 @@ const DepressionPredictionApp = () => {
                           </ResponsiveContainer>
                         </div>
                         <div className="insight" dangerouslySetInnerHTML={{ __html: riskAnalysis.insights }} />
-                      </div>
-
-                      {/* Original Charts */}
-                      <div className="chart-card">
-                        <h3 className="chart-title">Age Distribution</h3>
-                        {getAgeDistribution().length > 0 && (
-                          <ResponsiveContainer width="100%" height={250}>
-                            <BarChart data={getAgeDistribution()}>
-                              <CartesianGrid strokeDasharray="3 3" />
-                              <XAxis dataKey="range" />
-                              <YAxis />
-                              <Tooltip />
-                              <Bar dataKey="count" fill="#6366f1" />
-                            </BarChart>
-                          </ResponsiveContainer>
-                        )}
                       </div>
 
                       <div className="chart-card chart-full">
