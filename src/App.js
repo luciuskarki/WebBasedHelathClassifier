@@ -218,14 +218,8 @@ const DepressionPredictionApp = () => {
       { outcome: 'Not Depressed', count: notDepressed, percentage: notDepressedPct }
     ];
 
-    const insights = `
-      <strong>Depression Outcome Distribution:</strong><br/>
-      • Depressed Students: ${depressed} (${depressedPct}%)<br/>
-      • Not Depressed Students: ${notDepressed} (${notDepressedPct}%)<br/>
-      • Total Dataset Size: ${total} students
-    `;
 
-    return { data, insights };
+    return { data };
   }, [csvData]);
 
   // ============================================
@@ -254,21 +248,15 @@ const DepressionPredictionApp = () => {
       { category: 'No', count: noCount, percentage: noPct }
     ];
 
-    const insights = `
-      <strong>Family History of Mental Illness:</strong><br/>
-      • Yes: ${yesCount} students (${yesPct}%)<br/>
-      • No: ${noCount} students (${noPct}%)<br/>
-      • Family history present in ${yesPct}% of the population
-    `;
 
-    return { data, insights };
+    return { data };
   }, [csvData]);
 
   // ============================================
   // ANALYTIC 3: CGPA Distribution Across Age Groups
   // ============================================
   const cgpaAgeAnalysis = useMemo(() => {
-    if (!csvData || !csvData.data) return { data: [], insights: '', tableData: [] };
+    if (!csvData || !csvData.data) return { data: [], tableData: [] };
 
     const ageBins = [
       { name: '18-21', min: 18, max: 21 },
@@ -355,14 +343,8 @@ const DepressionPredictionApp = () => {
       curr.avg > max.avg ? curr : max
     );
 
-    const insights = `
-      <strong>CGPA Distribution by Age:</strong><br/>
-      • Highest Average CGPA: ${highestAvg.ageGroup} age group (${highestAvg.avg.toFixed(2)})<br/>
-      • Overall Average CGPA: ${overallAvg}<br/>
-      • Histograms show CGPA frequency distribution (5-10 scale) for each age group
-    `;
-
-    return { data: histogramData, insights, tableData };
+   
+    return { data: histogramData, tableData };
   }, [csvData]);
 
   // ============================================
@@ -451,21 +433,16 @@ const DepressionPredictionApp = () => {
       curr.avg > max.avg ? curr : max
     );
 
-    const insights = `
-      <strong>Study Satisfaction by Age:</strong><br/>
-      • Highest Average Satisfaction: ${highestSat.ageGroup} age group (${highestSat.avg.toFixed(2)}/5)<br/>
-      • Overall Average Satisfaction: ${overallAvg}/5<br/>
-      • Histograms show satisfaction level distribution (1-5 scale) for each age group
-    `;
+  
 
-    return { data: histogramData, insights, tableData };
+    return { data: histogramData, tableData };
   }, [csvData]);
 
   // ============================================
   // ANALYTIC 6: Feature Correlations with Depression
   // ============================================
   const correlationAgeAnalysis = useMemo(() => {
-    if (!csvData || !csvData.data) return { correlations: [], insights: '', tableData: [], chartData: [] };
+    if (!csvData || !csvData.data) return { correlations: [], tableData: [], chartData: [] };
 
     // All numeric features to correlate with Depression
     const numericFeatures = [
@@ -525,18 +502,9 @@ const DepressionPredictionApp = () => {
     const positiveCorrs = featureCorrelations.filter(f => f.correlation > 0);
     const negativeCorrs = featureCorrelations.filter(f => f.correlation < 0);
 
-    const insights = `
-      <strong>Feature Correlations with Depression:</strong><br/>
-      • Strongest Correlation: ${strongest.feature} (${strongest.correlation > 0 ? '+' : ''}${strongest.correlation})<br/>
-      • Positive correlations (increase depression risk): ${positiveCorrs.length} features<br/>
-      • Negative correlations (decrease depression risk): ${negativeCorrs.length} features<br/>
-      • Red bars = positive correlation (higher value → higher depression)<br/>
-      • Green bars = negative correlation (higher value → lower depression)
-    `;
-
+   
     return { 
       correlations: featureCorrelations, 
-      insights, 
       tableData,
       chartData 
     };
@@ -546,7 +514,7 @@ const DepressionPredictionApp = () => {
   // ANALYTIC 7: Sleep Duration vs Depression Risk Analysis
   // ============================================
   const sleepAnalysis = useMemo(() => {
-    if (!csvData || !csvData.data) return { data: [], insights: '' };
+    if (!csvData || !csvData.data) return { data: [] };
 
     const sleepCategories = {};
 
@@ -584,21 +552,16 @@ const DepressionPredictionApp = () => {
     const highest = analysisData[0];
     const lowest = analysisData[analysisData.length - 1];
 
-    const insights = `
-      <strong>Key Insights:</strong><br/>
-      • Highest Risk: Students with "${highest.sleepDuration}" sleep show ${highest.depressionRate}% depression rate (${highest.depressed}/${highest.total} cases)<br/>
-      • Lowest Risk: Students with "${lowest.sleepDuration}" sleep show ${lowest.depressionRate}% depression rate (${lowest.depressed}/${lowest.total} cases)<br/>
-      • Sleep quality appears to be a significant factor in mental health outcomes
-    `;
+ 
 
-    return { data: analysisData, insights };
+    return { data: analysisData };
   }, [csvData]);
 
   // ============================================
   // ANALYTIC 8: Multi-Factor Risk Score Analysis
   // ============================================
   const riskAnalysis = useMemo(() => {
-    if (!csvData || !csvData.data) return { data: [], insights: '', details: [] };
+    if (!csvData || !csvData.data) return { data: [], details: [] };
 
     const scoredData = csvData.data.map(row => {
       let riskScore = 0;
@@ -1207,9 +1170,7 @@ const DepressionPredictionApp = () => {
                       {/* ANALYTIC 8: Multi-Factor Risk Score */}
                       <div className="chart-card chart-full">
                         <h3 className="chart-title">Multi-Factor Risk Score Analysis</h3>
-                        <p style={{ color: '#6b7280', marginBottom: '1rem' }}>
-                          Composite risk score based on: Academic Pressure (×2), Financial Stress (×2), Study Hours, Family History (+5), and CGPA
-                        </p>
+                  
                         {renderStatsTable(riskAnalysis.details, 'Risk Category Breakdown')}
                         <div style={{ marginTop: '1.5rem' }}>
                           <ResponsiveContainer width="100%" height={300}>
