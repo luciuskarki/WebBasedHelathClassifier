@@ -2,11 +2,10 @@
   "numeric": [
     "Age",
     "Academic Pressure",
-    "Work Pressure",
     "CGPA",
     "Study Satisfaction",
-    "Job Satisfaction",
-    "Work/Study Hours"
+    "Work/Study Hours",
+    "Financial Stress"
   ],
   "categorical": [
     "Gender",
@@ -15,28 +14,22 @@
     "Sleep Duration",
     "Dietary Habits",
     "Degree",
-    "Financial Stress",
     "Family History of Mental Illness"
   ],
   "numeric_imputation": {
     "Age": 26.0,
     "Academic Pressure": 3.0,
-    "Work Pressure": 0.0,
     "CGPA": 7.77,
     "Study Satisfaction": 3.0,
-    "Job Satisfaction": 0.0,
-    "Work/Study Hours": 8.0
+    "Work/Study Hours": 8.0,
+    "Financial Stress": 3.0
   },
   "numeric_ranges_train": {
     "Age": {
       "min": 18.0,
-      "max": 59.0
+      "max": 58.0
     },
     "Academic Pressure": {
-      "min": 0.0,
-      "max": 5.0
-    },
-    "Work Pressure": {
       "min": 0.0,
       "max": 5.0
     },
@@ -48,13 +41,13 @@
       "min": 0.0,
       "max": 5.0
     },
-    "Job Satisfaction": {
-      "min": 0.0,
-      "max": 4.0
-    },
     "Work/Study Hours": {
       "min": 0.0,
       "max": 12.0
+    },
+    "Financial Stress": {
+      "min": 1.0,
+      "max": 5.0
     }
   },
   "categorical_vocabulary": {
@@ -63,19 +56,14 @@
       "Male"
     ],
     "City": [
-      "'Less Delhi'",
-      "'Less than 5 Kalyan'",
-      "3.0",
       "Agra",
       "Ahmedabad",
       "Bangalore",
       "Bhavna",
       "Bhopal",
       "Chennai",
-      "City",
       "Delhi",
       "Faridabad",
-      "Gaurav",
       "Ghaziabad",
       "Harsh",
       "Harsha",
@@ -84,28 +72,27 @@
       "Jaipur",
       "Kalyan",
       "Kanpur",
-      "Khaziabad",
       "Kolkata",
       "Lucknow",
       "Ludhiana",
-      "M.Com",
-      "M.Tech",
       "Meerut",
       "Mihir",
       "Mira",
       "Mumbai",
       "Nagpur",
+      "Nalini",
       "Nalyan",
       "Nandini",
       "Nashik",
       "Patna",
       "Pune",
       "Rajkot",
-      "Reyansh",
+      "Rashi",
       "Saanvi",
       "Srinagar",
       "Surat",
       "Thane",
+      "Vaanya",
       "Vadodara",
       "Varanasi",
       "Vasai-Virar",
@@ -120,7 +107,6 @@
       "Chef",
       "Doctor",
       "Entrepreneur",
-      "Lawyer",
       "Manager",
       "Pharmacist",
       "Student",
@@ -169,14 +155,6 @@
       "Others",
       "PhD"
     ],
-    "Financial Stress": [
-      "1.0",
-      "2.0",
-      "3.0",
-      "4.0",
-      "5.0",
-      "?"
-    ],
     "Family History of Mental Illness": [
       "No",
       "Yes"
@@ -192,10 +170,6 @@
       "kind": "numeric"
     },
     {
-      "source": "Work Pressure",
-      "kind": "numeric"
-    },
-    {
       "source": "CGPA",
       "kind": "numeric"
     },
@@ -204,11 +178,11 @@
       "kind": "numeric"
     },
     {
-      "source": "Job Satisfaction",
+      "source": "Work/Study Hours",
       "kind": "numeric"
     },
     {
-      "source": "Work/Study Hours",
+      "source": "Financial Stress",
       "kind": "numeric"
     },
     {
@@ -220,21 +194,6 @@
       "source": "Gender",
       "kind": "onehot",
       "category": "Male"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
-      "category": "'Less Delhi'"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
-      "category": "'Less than 5 Kalyan'"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
-      "category": "3.0"
     },
     {
       "source": "City",
@@ -269,22 +228,12 @@
     {
       "source": "City",
       "kind": "onehot",
-      "category": "City"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
       "category": "Delhi"
     },
     {
       "source": "City",
       "kind": "onehot",
       "category": "Faridabad"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
-      "category": "Gaurav"
     },
     {
       "source": "City",
@@ -329,11 +278,6 @@
     {
       "source": "City",
       "kind": "onehot",
-      "category": "Khaziabad"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
       "category": "Kolkata"
     },
     {
@@ -345,16 +289,6 @@
       "source": "City",
       "kind": "onehot",
       "category": "Ludhiana"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
-      "category": "M.Com"
-    },
-    {
-      "source": "City",
-      "kind": "onehot",
-      "category": "M.Tech"
     },
     {
       "source": "City",
@@ -380,6 +314,11 @@
       "source": "City",
       "kind": "onehot",
       "category": "Nagpur"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Nalini"
     },
     {
       "source": "City",
@@ -414,7 +353,7 @@
     {
       "source": "City",
       "kind": "onehot",
-      "category": "Reyansh"
+      "category": "Rashi"
     },
     {
       "source": "City",
@@ -435,6 +374,11 @@
       "source": "City",
       "kind": "onehot",
       "category": "Thane"
+    },
+    {
+      "source": "City",
+      "kind": "onehot",
+      "category": "Vaanya"
     },
     {
       "source": "City",
@@ -495,11 +439,6 @@
       "source": "Profession",
       "kind": "onehot",
       "category": "Entrepreneur"
-    },
-    {
-      "source": "Profession",
-      "kind": "onehot",
-      "category": "Lawyer"
     },
     {
       "source": "Profession",
@@ -707,36 +646,6 @@
       "category": "PhD"
     },
     {
-      "source": "Financial Stress",
-      "kind": "onehot",
-      "category": "1.0"
-    },
-    {
-      "source": "Financial Stress",
-      "kind": "onehot",
-      "category": "2.0"
-    },
-    {
-      "source": "Financial Stress",
-      "kind": "onehot",
-      "category": "3.0"
-    },
-    {
-      "source": "Financial Stress",
-      "kind": "onehot",
-      "category": "4.0"
-    },
-    {
-      "source": "Financial Stress",
-      "kind": "onehot",
-      "category": "5.0"
-    },
-    {
-      "source": "Financial Stress",
-      "kind": "onehot",
-      "category": "?"
-    },
-    {
       "source": "Family History of Mental Illness",
       "kind": "onehot",
       "category": "No"
@@ -748,5 +657,5 @@
     }
   ],
   "preproc_version": "v1",
-  "trained_on": "2025-10-28"
+  "trained_on": "2025-10-29"
 }
