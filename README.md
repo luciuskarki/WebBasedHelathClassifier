@@ -23,4 +23,8 @@
 }
 
 ### Notes
-Educational demo only � not medical advice.
+Educational demo only. Not medical advice.
+
+Dependencies:
+lucide-react: npm install lucide-react@latest
+recharts: npm install recharts
